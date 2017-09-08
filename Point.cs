@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class Point : MonoBehaviour {
 
     public bool isMoving;
+    public bool isSelected;
 
     //Draw size
     public float size = 0.5f;
@@ -22,17 +23,18 @@ public class Point : MonoBehaviour {
         get { return mesh.bounds.center; }
     }
 
+    //Tranform
+    IGB283Transform meshTransform = new IGB283Transform();
+
     //Sliders
     public Slider SliderR;
     public Slider SliderG;
     public Slider SliderB;
-    // RGB Colors
+
     public float ColorR = 1.0f;
     public float ColorG = 1.0f;
     public float ColorB = 1.0f;
 
-    //Tranform
-    IGB283Transform meshTransform = new IGB283Transform();
 
     // Use this for initialization
     public void Initialise(Vector2 pos, Material mat)
@@ -52,12 +54,18 @@ public class Point : MonoBehaviour {
     {
         MouseClickAction();
         Move();
-        //Color Change
-        ColorR = SliderR.value;
-        ColorG = SliderG.value;
-        ColorB = SliderB.value;
+        SelectClick();
 
-        UpdateColor(ColorR, ColorG, ColorB);
+        if (SliderR)
+            ColorR = SliderR.value;
+        if (SliderG)
+            ColorG = SliderG.value;
+        if (SliderB)
+            ColorB = SliderB.value;
+
+        if (isSelected) {
+            UpdateColor(ColorR, ColorG, ColorB);
+        }
     }
 
     public void Draw()
@@ -103,12 +111,6 @@ public class Point : MonoBehaviour {
         offset.y = mesh.bounds.size.y / 2;
     }
 
-    public void UpdateColor(float R, float G, float B)
-    {
-        gameObject.GetComponent<MeshRenderer>().material.color = new Color(ColorR, ColorG, ColorB);
-
-    }
-
     void Move() {
         if (!isMoving)
             return;
@@ -142,6 +144,42 @@ public class Point : MonoBehaviour {
         }
     }
 
+    public void UpdateColor(float R, float G, float B) {
+        gameObject.GetComponent<MeshRenderer>().material.color = new Color(ColorR, ColorG, ColorB);
+
+    }
+
+    void SelectClick() {
+        if (Input.GetMouseButtonDown(1)) {
+            SelectHover();
+        }
+    }
+
+    void SelectHover() {
+        Vector2 mousePostion = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Collider2D hitCollider = Physics2D.OverlapPoint(mousePostion);
+
+        if (hitCollider && hitCollider.gameObject == gameObject) {
+            isSelected = true;
+            FindSliders();
+            SetSliders();
+        } else {
+            isSelected = false;
+        }
+    }
+
+    void SetSliders() {
+        SliderR.value = ColorR;
+        SliderG.value = ColorG;
+        SliderB.value = ColorB;
+    }
+
+    void FindSliders() {
+        SliderR = GameObject.Find("Red").GetComponent<Slider>();
+        SliderG = GameObject.Find("Green").GetComponent<Slider>();
+        SliderB = GameObject.Find("Blue").GetComponent<Slider>();
+    }
 }
 
 
