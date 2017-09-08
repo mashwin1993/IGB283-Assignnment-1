@@ -41,8 +41,12 @@ public class Triangle : MonoBehaviour
 
     //Rotation Slider
     public Slider RotateSlider;
+    
+    //Color Variables
+    new Color color1;
+    new Color color2;
 
-
+    
     
 
     public Vector3 centre
@@ -91,6 +95,11 @@ public class Triangle : MonoBehaviour
         meshTransform.Scale(scale);
 
         meshTransform.RotateCenter(RotateAngle);
+        
+        //Color Changing with Lerp
+        color1 = point1.GetComponent<MeshRenderer>().material.color;
+        color2 = point2.GetComponent<MeshRenderer>().material.color;
+        gameObject.GetComponent<MeshRenderer>().material.color = Color.Lerp(color1, color2, speed *Time.deltaTime);
     }
 
 
