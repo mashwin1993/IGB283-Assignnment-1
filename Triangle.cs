@@ -32,6 +32,7 @@ public class Triangle : MonoBehaviour
     public Material material;
     public Mesh mesh;
 
+
     //Offset for Rotation
     private Vector3 offset;
 
