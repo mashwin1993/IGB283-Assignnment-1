@@ -7,6 +7,7 @@ public class Triangle : MonoBehaviour
 {
     //Public Variables
 
+
     //Locations
     public Vector2 pos1;
     public Vector2 pos2;
@@ -76,6 +77,11 @@ public class Triangle : MonoBehaviour
 
         direction = targetPoint.centre - centre;
 
+        if(SpeedSlider)
+            speed = SpeedSlider.value;
+
+        if (RotateSlider)
+            RotateAngle = RotateSlider.value;
 
         meshTransform.Translate(direction.normalized * speed * Time.deltaTime);
 
