@@ -32,6 +32,7 @@ public class Triangle : MonoBehaviour
     public Material material;
     public Mesh mesh;
 
+
     //Offset for Rotation
     private Vector3 offset;
 
@@ -63,6 +64,8 @@ public class Triangle : MonoBehaviour
 
         point1 = PointAt(pos1);
         point2 = PointAt(pos2);
+
+        SpeedSlider.value = 1.0f;
 
         SwitchTarget();
     }
