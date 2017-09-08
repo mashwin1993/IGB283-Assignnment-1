@@ -65,6 +65,8 @@ public class Triangle : MonoBehaviour
         point1 = PointAt(pos1);
         point2 = PointAt(pos2);
 
+        SpeedSlider.value = 1.0f;
+
         SwitchTarget();
     }
 
