@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +22,8 @@ public class Triangle : MonoBehaviour
 
     public Vector2 direction;
     public float speed;
+    //Speed Slider
+    public Slider SpeedSlider;
 
     public GameObject target;
 
@@ -35,7 +37,14 @@ public class Triangle : MonoBehaviour
     //Public Rotation Angle Attach to slider
     public float RotateAngle;
 
-    public Vector3 centre {
+    //Rotation Slider
+    public Slider RotateSlider;
+
+
+    
+
+    public Vector3 centre
+    {
         get { return mesh.bounds.center; }
     }
 
@@ -60,7 +69,8 @@ public class Triangle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (ReachedTarget()) {
+        if (ReachedTarget())
+        {
             SwitchTarget();
         }
 
@@ -70,6 +80,8 @@ public class Triangle : MonoBehaviour
         meshTransform.Translate(direction.normalized * speed * Time.deltaTime);
 
         meshTransform.Scale(scale);
+
+        meshTransform.RotateCenter(RotateAngle);
     }
 
 
@@ -117,24 +129,30 @@ public class Triangle : MonoBehaviour
         offset.y = mesh.bounds.size.y / 2;
     }
 
-    GameObject PointAt(Vector2 pos) {
+    GameObject PointAt(Vector2 pos)
+    {
         GameObject point = Instantiate(new GameObject("Point"), transform);
         Point script = point.AddComponent<Point>();
         script.Initialise(pos, material);
         return point;
     }
 
-    void SwitchTarget() {
-        if (!currentTarget || currentTarget == point1.transform) {
+    void SwitchTarget()
+    {
+        if (!currentTarget || currentTarget == point1.transform)
+        {
             currentTarget = point2.transform;
-        } else {
+        }
+        else
+        {
             currentTarget = point1.transform;
         }
 
         targetPoint = currentTarget.GetComponent<Point>();
     }
 
-    bool ReachedTarget() {
+    bool ReachedTarget()
+    {
         return Vector3.Distance(centre, targetPoint.centre) < speed * Time.deltaTime;
     }
 }
