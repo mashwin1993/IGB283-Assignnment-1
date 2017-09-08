@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Point : MonoBehaviour {
+public class Point : MonoBehaviour
+{
 
     public bool isMoving;
     public bool isSelected;
@@ -19,7 +20,8 @@ public class Point : MonoBehaviour {
     //Offset for Rotation
     private Vector3 offset;
 
-    public Vector3 centre {
+    public Vector3 centre
+    {
         get { return mesh.bounds.center; }
     }
 
@@ -63,7 +65,8 @@ public class Point : MonoBehaviour {
         if (SliderB)
             ColorB = SliderB.value;
 
-        if (isSelected) {
+        if (isSelected)
+        {
             UpdateColor(ColorR, ColorG, ColorB);
         }
     }
@@ -111,7 +114,8 @@ public class Point : MonoBehaviour {
         offset.y = mesh.bounds.size.y / 2;
     }
 
-    void Move() {
+    void Move()
+    {
         if (!isMoving)
             return;
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -122,21 +126,28 @@ public class Point : MonoBehaviour {
         //GetComponent<PolygonCollider2D>().
     }
 
-    void MouseOverAction() {
+    void MouseOverAction()
+    {
         Vector2 mousePostion = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         Collider2D hitCollider = Physics2D.OverlapPoint(mousePostion);
 
-        if (hitCollider && hitCollider.gameObject == gameObject) {
+        if (hitCollider && hitCollider.gameObject == gameObject)
+        {
             isMoving = true;
         }
     }
 
-    void MouseClickAction() {
-        if (Input.GetMouseButtonDown(0)) {
+    void MouseClickAction()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
             MouseOverAction();
-        } else if (!Input.GetMouseButton(0)) {
-            if (isMoving) {
+        }
+        else if (!Input.GetMouseButton(0))
+        {
+            if (isMoving)
+            {
                 Destroy(gameObject.GetComponent<PolygonCollider2D>());
                 gameObject.AddComponent<PolygonCollider2D>();
             }
@@ -144,42 +155,49 @@ public class Point : MonoBehaviour {
         }
     }
 
-    public void UpdateColor(float R, float G, float B) {
+    public void UpdateColor(float R, float G, float B)
+    {
         gameObject.GetComponent<MeshRenderer>().material.color = new Color(ColorR, ColorG, ColorB);
 
     }
 
-    void SelectClick() {
-        if (Input.GetMouseButtonDown(1)) {
+    void SelectClick()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
             SelectHover();
         }
     }
 
-    void SelectHover() {
+    void SelectHover()
+    {
         Vector2 mousePostion = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         Collider2D hitCollider = Physics2D.OverlapPoint(mousePostion);
 
-        if (hitCollider && hitCollider.gameObject == gameObject) {
+        if (hitCollider && hitCollider.gameObject == gameObject)
+        {
             isSelected = true;
             FindSliders();
             SetSliders();
-        } else {
+        }
+        else
+        {
             isSelected = false;
         }
     }
 
-    void SetSliders() {
+    void SetSliders()
+    {
         SliderR.value = ColorR;
         SliderG.value = ColorG;
         SliderB.value = ColorB;
     }
 
-    void FindSliders() {
+    void FindSliders()
+    {
         SliderR = GameObject.Find("Red").GetComponent<Slider>();
         SliderG = GameObject.Find("Green").GetComponent<Slider>();
         SliderB = GameObject.Find("Blue").GetComponent<Slider>();
     }
 }
-
-
