@@ -45,7 +45,6 @@ public class Point : MonoBehaviour
         tag = "Knob";
         material = mat;
         Draw();
-        meshTransform.Initialise(mesh);
         meshTransform.Translate(pos);
 
         gameObject.AddComponent<PolygonCollider2D>();
@@ -85,34 +84,10 @@ public class Point : MonoBehaviour
         //Set the material to selected material 
         GetComponent<MeshRenderer>().material = material;
 
-        //Clear all data from the mesh
-        mesh.Clear();
+        meshTransform.Initialise(mesh);
 
-        //Set triangle points 
-        mesh.vertices = new Vector3[]
-        {
-            new Vector3(0, 0, size),
-            new Vector3(0, size, size),
-            new Vector3(size, size, size),
-            new Vector3(size, 0, size)
-        };
-
-        // Set colours of the triangle
-        mesh.colors = new Color[]
-        {
-            new Color(1.0f, 1.0f, 1.0f, 1.0f),
-            new Color(1.0f, 1.0f, 1.0f, 1.0f),
-            new Color(1.0f, 1.0f, 1.0f, 1.0f),
-            new Color(1.0f, 1.0f, 1.0f, 1.0f)
-        };
-
-
-        // Set vertex indicies
-        mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
-
-        // Calculate the bounds of the rectangle
-        offset.x = mesh.bounds.size.x / 2;
-        offset.y = mesh.bounds.size.y / 2;
+        Reshape(20);
+        meshTransform.Scale(Vector2.one * 0.2f);
     }
 
     void Move()
@@ -204,5 +179,67 @@ public class Point : MonoBehaviour
         SliderR = GameObject.Find("Red").GetComponent<Slider>();
         SliderG = GameObject.Find("Green").GetComponent<Slider>();
         SliderB = GameObject.Find("Blue").GetComponent<Slider>();
+    }
+
+    void Reshape(int sides) {
+        //Reject values too low or high
+        if (sides < 3 || sides > 50) {
+            Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", sides);
+            return;
+        }
+
+        //Get the current position to move the new mesh to
+        Vector2 position = new Vector2(centre.x, centre.y);
+
+        List<Vector3> verts = new List<Vector3>();
+        //Add centre vertex
+        verts.Add(Vector3.zero);
+
+        //Add surrounding vertices
+        for (int i = 0; i < sides; i++) {
+            verts.Add(new Vector3(Mathf.Sin(i * 2 * Mathf.PI / sides), Mathf.Cos(i * 2 * Mathf.PI / sides), 1));
+        }
+
+        List<int> tris = new List<int>();
+        //Add initial (outlier) tri
+        tris.Add(0);
+        tris.Add(1);
+        tris.Add(verts.Count - 1);
+
+        //Add fanning out tris
+        for (int i = 1; i < sides; i++) {
+            tris.Add(0);
+            tris.Add(i);
+            tris.Add(i + 1);
+        }
+
+        List<Color> colours = new List<Color>();
+        //Set all vertex colours to default
+        for (int i = 0; i < mesh.vertexCount; i++) {
+            colours.Add(Color.white);
+        }
+
+        //Send values to operation method
+        RecreateMesh(verts.ToArray(), tris.ToArray(), colours.ToArray());
+
+        //Move new mesh to previous position
+        meshTransform.Translate(position);
+    }
+
+    void RecreateMesh(Vector3[] verts, int[] tris, Color[] colours) {
+        //Clear all data from the mesh
+        mesh.Clear();
+
+        //Add vertices to mesh
+        mesh.vertices = verts;
+
+        //Add triangles to mesh
+        mesh.triangles = tris;
+
+        //Add colours to mesh
+        mesh.colors = colours;
+
+        //Recalculate the bounds of the mesh
+        mesh.RecalculateBounds();
     }
 }

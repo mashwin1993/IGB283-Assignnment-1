@@ -9,6 +9,7 @@ public class Triangle : MonoBehaviour
 
     public bool reshape;
     public int sides = 3;
+    public bool isStar;
 
     //Locations
     public Vector2 pos1;
@@ -57,9 +58,6 @@ public class Triangle : MonoBehaviour
 
         Draw();
 
-        meshTransform.Initialise(mesh);
-        meshTransform.Translate(pos1);
-
         point1 = PointAt(pos1);
         point2 = PointAt(pos2);
 
@@ -73,7 +71,11 @@ public class Triangle : MonoBehaviour
     {
         if (reshape) {
             reshape = false;
-            Reshape(sides);
+            if (isStar) {
+                ReshapeStar(sides);
+            } else {
+                Reshape(sides);
+            }
         }
 
         if (ReachedTarget())
@@ -121,6 +123,9 @@ public class Triangle : MonoBehaviour
         // Get Mesh from the MeshFilter
         mesh = GetComponent<MeshFilter>().mesh;
 
+        meshTransform.Initialise(mesh);
+        meshTransform.Translate(pos1);
+
         //Set the material to selected material 
         GetComponent<MeshRenderer>().material = material;
 
@@ -166,7 +171,7 @@ public class Triangle : MonoBehaviour
         }
 
         //Get the current position to move the new mesh to
-        Vector2 position = new Vector2(centre.x, centre.y);
+        Vector2 position = centre;
 
         List<Vector3> verts = new List<Vector3>();
         //Add centre vertex
@@ -181,7 +186,7 @@ public class Triangle : MonoBehaviour
         //Add initial (outlier) tri
         tris.Add(0);
         tris.Add(1);
-        tris.Add(mesh.vertexCount - 1);
+        tris.Add(verts.Count - 1);
 
         //Add fanning out tris
         for (int i = 1; i < sides; i++) {
@@ -190,20 +195,14 @@ public class Triangle : MonoBehaviour
             tris.Add(i + 1);
         }
 
-        List<Color> colours = new List<Color>();
-        //Set all vertex colours to default
-        for (int i = 0; i < mesh.vertexCount; i++) {
-            colours.Add(Color.white);
-        }
-
         //Send values to operation method
-        RecreateMesh(verts.ToArray(), tris.ToArray(), colours.ToArray());
+        RecreateMesh(verts.ToArray(), tris.ToArray());
 
         //Move new mesh to previous position
         meshTransform.Translate(position);
     }
 
-    void RecreateMesh(Vector3[] verts, int[] tris, Color[] colours) {
+    void RecreateMesh(Vector3[] verts, int[] tris) {
         //Clear all data from the mesh
         mesh.Clear();
 
@@ -213,10 +212,52 @@ public class Triangle : MonoBehaviour
         //Add triangles to mesh
         mesh.triangles = tris;
 
-        //Add colours to mesh
-        mesh.colors = colours;
+        List<Color> colours = new List<Color>();
+        //Set all vertex colours to default
+        for (int i = 0; i < mesh.vertexCount; i++) {
+            colours.Add(Color.white);
+        }
 
         //Recalculate the bounds of the mesh
         mesh.RecalculateBounds();
+    }
+
+    void ReshapeStar(int points) {
+        //Reject values too low or high
+        if (points < 3 || points > 50) {
+            Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", points);
+            return;
+        }
+
+        Reshape(points);
+
+        Vector2 offset = mesh.vertices[0];
+        meshTransform.Translate(-offset);
+        meshTransform.ScaleUnrestricted(Vector2.one * 0.5f);
+
+        int newStart = mesh.vertexCount;
+
+        List<Vector3> verts = new List<Vector3>(mesh.vertices);
+        //Add point vertices
+        for (int i = 0; i < points; i++) {
+            verts.Add(new Vector3(Mathf.Sin((i + 0.5f) * 2 * Mathf.PI / points), Mathf.Cos((i + 0.5f) * 2 * Mathf.PI / points), 1));
+        }
+
+        List<int> tris = new List<int>(mesh.triangles);
+        //Add initial (outlier) tri
+        tris.Add(verts.Count - 1);
+        tris.Add(1);
+        tris.Add(newStart - 1);
+
+        //Add fanning out tris
+        for (int i = 0; i < points - 1; i++) {
+            tris.Add(newStart + i);
+            tris.Add(i + 1);
+            tris.Add(i + 2);
+        }
+
+        RecreateMesh(verts.ToArray(), tris.ToArray());
+
+        meshTransform.Translate(offset);
     }
 }

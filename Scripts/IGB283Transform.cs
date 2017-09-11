@@ -86,11 +86,22 @@ public class IGB283Transform : MonoBehaviour
         toScale.x = Mathf.Clamp(toScale.x, 0.000001f, float.MaxValue);
         toScale.y = Mathf.Clamp(toScale.y, 0.000001f, float.MaxValue);
 
+        Vector2 offset = mesh.bounds.center;
+        Translate(-offset);
         ApplyTransform(ScaleMatrix(new Vector2((toScale.x * toScalePositive.x) / (signedScale.x * scale.x), (toScale.y * toScalePositive.y) / (signedScale.y * scale.y))));
-
+        Translate(offset);
 
         signedScale = toScalePositive;
         scale = toScale;
+    }
+
+    public void ScaleUnrestricted(Vector2 scale) {
+        //Special case, assumes vertex 0 is origin
+        Vector2 offset = mesh.vertices[0];
+        Translate(-offset);
+        ApplyTransform(ScaleMatrix(scale));
+        Translate(offset);
+
     }
 
     //Applies a transform to the mesh and does subsequent functions
