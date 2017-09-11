@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class Triangle : MonoBehaviour
 {
@@ -43,6 +44,8 @@ public class Triangle : MonoBehaviour
     new Color color1;
     new Color color2;
 
+    //Music Player
+    public AudioSource Music;
 
     public Vector3 centre
     {
@@ -110,6 +113,9 @@ public class Triangle : MonoBehaviour
         float t = (totalDist - remDist) / totalDist;
 
         gameObject.GetComponent<MeshRenderer>().material.color = Color.Lerp(color1, color2, t);
+        
+        //Tie music volume to if the object is moving
+        Music.volume = speed;
     }
 
 
