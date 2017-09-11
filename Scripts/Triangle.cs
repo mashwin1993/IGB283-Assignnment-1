@@ -9,7 +9,7 @@ public class Triangle : MonoBehaviour
     //Public Variables
 
     public bool reshape;
-    public int sides = 3;
+    public int sides = 31;
     public bool isStar;
 
     //Locations
