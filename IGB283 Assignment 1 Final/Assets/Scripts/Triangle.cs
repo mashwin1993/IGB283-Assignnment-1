@@ -9,10 +9,19 @@ public class Triangle : MonoBehaviour
     //Public Variables
 
     //UI Elements V2
-    public Toggle ReshapeToggle;
+    //Reshape Button
+    // Reshape code is attached to Unity Button object
+    public Button ReshapeButton;
+
+    // Bool Toggle for ifStar
     public Toggle StarToggle;
-    private int SideHolder;
+    //# of Sides Slider
     public Slider SideSlider;
+    //Rotation Slider
+    public Slider RotateSlider;
+    //Speed Slider
+    public Slider SpeedSlider;
+
 
     public bool reshape;
     public int sides = 31;
@@ -33,8 +42,6 @@ public class Triangle : MonoBehaviour
 
     public Vector2 direction;
     public float speed;
-    //Speed Slider
-    public Slider SpeedSlider;
 
     //Materials
     public Material material;
@@ -42,9 +49,6 @@ public class Triangle : MonoBehaviour
 
     //Public Rotation Angle Attach to slider
     public float RotateAngle;
-
-    //Rotation Slider
-    public Slider RotateSlider;
 
     //Color Variables
     new Color color1;
@@ -91,17 +95,7 @@ public class Triangle : MonoBehaviour
         {
             isStar = false;
         }
-        //ReshapeToggle check
-        if (ReshapeToggle.isOn == true)
-        {
-            reshape = true;
-        }
-        else
-        {
-            reshape = false;
-        }
 
-        //Number of Sides
 
         if (SideSlider)
             //SideHolder = Mathf.RoundToInt(SideSlider.value);
@@ -321,5 +315,10 @@ public class Triangle : MonoBehaviour
         RecreateMesh(verts.ToArray(), tris.ToArray());
 
         meshTransform.Translate(offset);
+    }
+
+    public void ReshapePress()
+    {
+        reshape = true;
     }
 }
