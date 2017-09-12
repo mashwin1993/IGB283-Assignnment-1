@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -98,7 +98,8 @@ public class Point : MonoBehaviour
 
         //transform.position = mousePosition;
         Vector2 direction = mousePosition - new Vector2(centre.x, centre.y);
-        if (lockX) {
+        if (lockX)
+        {
             direction.x = 0;
         }
 
@@ -181,9 +182,11 @@ public class Point : MonoBehaviour
         SliderB = GameObject.Find("Blue").GetComponent<Slider>();
     }
 
-    void Reshape(int sides) {
+    void Reshape(int sides)
+    {
         //Reject values too low or high
-        if (sides < 3 || sides > 50) {
+        if (sides < 3 || sides > 50)
+        {
             Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", sides);
             return;
         }
@@ -196,7 +199,8 @@ public class Point : MonoBehaviour
         verts.Add(Vector3.zero);
 
         //Add surrounding vertices
-        for (int i = 0; i < sides; i++) {
+        for (int i = 0; i < sides; i++)
+        {
             verts.Add(new Vector3(Mathf.Sin(i * 2 * Mathf.PI / sides), Mathf.Cos(i * 2 * Mathf.PI / sides), 1));
         }
 
@@ -207,7 +211,8 @@ public class Point : MonoBehaviour
         tris.Add(verts.Count - 1);
 
         //Add fanning out tris
-        for (int i = 1; i < sides; i++) {
+        for (int i = 1; i < sides; i++)
+        {
             tris.Add(0);
             tris.Add(i);
             tris.Add(i + 1);
@@ -215,7 +220,8 @@ public class Point : MonoBehaviour
 
         List<Color> colours = new List<Color>();
         //Set all vertex colours to default
-        for (int i = 0; i < mesh.vertexCount; i++) {
+        for (int i = 0; i < mesh.vertexCount; i++)
+        {
             colours.Add(Color.white);
         }
 
@@ -226,7 +232,8 @@ public class Point : MonoBehaviour
         meshTransform.Translate(position);
     }
 
-    void RecreateMesh(Vector3[] verts, int[] tris, Color[] colours) {
+    void RecreateMesh(Vector3[] verts, int[] tris, Color[] colours)
+    {
         //Clear all data from the mesh
         mesh.Clear();
 

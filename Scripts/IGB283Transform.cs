@@ -95,7 +95,8 @@ public class IGB283Transform : MonoBehaviour
         scale = toScale;
     }
 
-    public void ScaleUnrestricted(Vector2 scale) {
+    public void ScaleUnrestricted(Vector2 scale)
+    {
         //Special case, assumes vertex 0 is origin
         Vector2 offset = mesh.vertices[0];
         Translate(-offset);

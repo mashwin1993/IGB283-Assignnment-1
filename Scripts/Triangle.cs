@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +7,11 @@ using UnityEngine.Audio;
 public class Triangle : MonoBehaviour
 {
     //Public Variables
+
+    //UI Elements V2
+    public Toggle ReshapeToggle;
+    public Toggle StarToggle;
+    public InputField SideInput;
 
     public bool reshape;
     public int sides = 31;
@@ -67,16 +72,54 @@ public class Triangle : MonoBehaviour
         SpeedSlider.value = 1.0f;
 
         SwitchTarget();
+
     }
+
+
 
     // Update is called once per frame
     void Update()
     {
-        if (reshape) {
+        //UI updates
+        //Star Toggle check
+        if (StarToggle.isOn == true)
+        {
+            isStar = true;
+        }
+        else
+        {
+            isStar = false;
+        }
+        //ReshapeToggle check
+        if (ReshapeToggle.isOn == true)
+        {
+            reshape = true;
+        }
+        else
+        {
             reshape = false;
-            if (isStar) {
+        }
+
+        //Number of Sides
+
+        if (SideInput.text != "")
+        {
+            sides = int.Parse(SideInput.text);
+        }
+
+
+
+
+
+        if (reshape)
+        {
+            reshape = false;
+            if (isStar)
+            {
                 ReshapeStar(sides);
-            } else {
+            }
+            else
+            {
                 Reshape(sides);
             }
         }
@@ -88,7 +131,7 @@ public class Triangle : MonoBehaviour
 
         direction = targetPoint.centre - centre;
 
-        if(SpeedSlider)
+        if (SpeedSlider)
             speed = SpeedSlider.value;
 
         if (RotateSlider)
@@ -113,9 +156,10 @@ public class Triangle : MonoBehaviour
         float t = (totalDist - remDist) / totalDist;
 
         gameObject.GetComponent<MeshRenderer>().material.color = Color.Lerp(color1, color2, t);
-        
+
         //Tie music volume to if the object is moving
         Music.volume = speed;
+       
     }
 
 
@@ -147,6 +191,8 @@ public class Triangle : MonoBehaviour
         return point;
     }
 
+
+
     void SwitchTarget()
     {
         //Initialise/Switch between targets
@@ -169,9 +215,11 @@ public class Triangle : MonoBehaviour
         return Vector3.Distance(centre, targetPoint.centre) < speed * Time.deltaTime;
     }
 
-    void Reshape(int sides) {
+    void Reshape(int sides)
+    {
         //Reject values too low or high
-        if (sides < 3 || sides > 50) {
+        if (sides < 3 || sides > 50)
+        {
             Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", sides);
             return;
         }
@@ -184,10 +232,11 @@ public class Triangle : MonoBehaviour
         verts.Add(Vector3.zero);
 
         //Add surrounding vertices
-        for (int i = 0; i < sides; i++) {
+        for (int i = 0; i < sides; i++)
+        {
             verts.Add(new Vector3(Mathf.Sin(i * 2 * Mathf.PI / sides), Mathf.Cos(i * 2 * Mathf.PI / sides), 1));
         }
-    
+
         List<int> tris = new List<int>();
         //Add initial (outlier) tri
         tris.Add(0);
@@ -195,7 +244,8 @@ public class Triangle : MonoBehaviour
         tris.Add(verts.Count - 1);
 
         //Add fanning out tris
-        for (int i = 1; i < sides; i++) {
+        for (int i = 1; i < sides; i++)
+        {
             tris.Add(0);
             tris.Add(i);
             tris.Add(i + 1);
@@ -208,7 +258,8 @@ public class Triangle : MonoBehaviour
         meshTransform.Translate(position);
     }
 
-    void RecreateMesh(Vector3[] verts, int[] tris) {
+    void RecreateMesh(Vector3[] verts, int[] tris)
+    {
         //Clear all data from the mesh
         mesh.Clear();
 
@@ -220,7 +271,8 @@ public class Triangle : MonoBehaviour
 
         List<Color> colours = new List<Color>();
         //Set all vertex colours to default
-        for (int i = 0; i < mesh.vertexCount; i++) {
+        for (int i = 0; i < mesh.vertexCount; i++)
+        {
             colours.Add(Color.white);
         }
 
@@ -228,9 +280,11 @@ public class Triangle : MonoBehaviour
         mesh.RecalculateBounds();
     }
 
-    void ReshapeStar(int points) {
+    void ReshapeStar(int points)
+    {
         //Reject values too low or high
-        if (points < 3 || points > 50) {
+        if (points < 3 || points > 50)
+        {
             Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", points);
             return;
         }
@@ -245,7 +299,8 @@ public class Triangle : MonoBehaviour
 
         List<Vector3> verts = new List<Vector3>(mesh.vertices);
         //Add point vertices
-        for (int i = 0; i < points; i++) {
+        for (int i = 0; i < points; i++)
+        {
             verts.Add(new Vector3(Mathf.Sin((i + 0.5f) * 2 * Mathf.PI / points), Mathf.Cos((i + 0.5f) * 2 * Mathf.PI / points), 1));
         }
 
@@ -256,7 +311,8 @@ public class Triangle : MonoBehaviour
         tris.Add(newStart - 1);
 
         //Add fanning out tris
-        for (int i = 0; i < points - 1; i++) {
+        for (int i = 0; i < points - 1; i++)
+        {
             tris.Add(newStart + i);
             tris.Add(i + 1);
             tris.Add(i + 2);
