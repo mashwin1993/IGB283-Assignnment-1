@@ -55,12 +55,12 @@ public class Triangle : MonoBehaviour
     new Color color2;
 
     //Duplication Prefabs
-    public Transform ObjectPrefab;
-    public Transform Point1Prefab;
-    public Transform point2Prefab;
+    public GameObject ObjectPrefab;
+    public GameObject Point1Prefab;
+    public GameObject point2Prefab;
 
     //Clone Holding
-    private Transform ObjectClone;
+    private GameObject ObjectClone;
     private GameObject Point1Clone;
     private GameObject Point2Clone;
 
@@ -93,6 +93,7 @@ public class Triangle : MonoBehaviour
 
         //Duplication Code
         ObjectClone = Instantiate(ObjectPrefab, new Vector3(0.0f, 4.0f, 0.0f), Quaternion.identity);
+
         
     }
 
