@@ -11,7 +11,8 @@ public class Triangle : MonoBehaviour
     //UI Elements V2
     public Toggle ReshapeToggle;
     public Toggle StarToggle;
-    public InputField SideInput;
+    private int SideHolder;
+    public Slider SideSlider;
 
     public bool reshape;
     public int sides = 31;
@@ -102,11 +103,10 @@ public class Triangle : MonoBehaviour
 
         //Number of Sides
 
-        if (SideInput.text != "")
-        {
-            sides = int.Parse(SideInput.text);
-        }
-
+        if (SideSlider)
+            //SideHolder = Mathf.RoundToInt(SideSlider.value);
+            //sides = SideHolder;
+            sides = Mathf.RoundToInt(SideSlider.value);
 
 
 
