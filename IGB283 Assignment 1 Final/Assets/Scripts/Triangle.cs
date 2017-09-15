@@ -104,11 +104,18 @@ public class Triangle : MonoBehaviour
         GetReferences();
 
         //Duplication Code
-        if (!GameObject.FindGameObjectWithTag("ObjectParent")) {
-            tag = "ObjectParent";
-            new GameObject("Shape Clone").AddComponent<Triangle>();
+        if (!GameObject.Find("ObjectParent")) {
+            name = "ObjectParent";
+            new GameObject("Object Clone").AddComponent<Triangle>();
+            meshTransform.Translate(Vector2.up * 2);
+            Reshape(15);
+            rotateAngle = 5;
         } else {
-            tag = "Object";
+            name = "Object Clone";
+            isStar = true;
+            ReshapeStar(15);
+            rotateAngle = -10;
+            speed = 3;
         }
     }
 
@@ -123,15 +130,56 @@ public class Triangle : MonoBehaviour
         point1Renderer = point1.GetComponent<MeshRenderer>();
         point2Renderer = point2.GetComponent<MeshRenderer>();
 
-        starToggle = GameObject.FindGameObjectWithTag("StarButton").GetComponent<Toggle>();
-        speedSlider = GameObject.FindGameObjectWithTag("SpeedSlider").GetComponent<Slider>();
-        rotateSlider = GameObject.FindGameObjectWithTag("RotationSlider").GetComponent<Slider>();
-        sideSlider = GameObject.FindGameObjectWithTag("SideSlider").GetComponent<Slider>();
+        GameObject tempObject;
 
-        xScaleSlider = GameObject.FindGameObjectWithTag("XScaleSlider").GetComponent<Slider>();
-        yScaleSlider = GameObject.FindGameObjectWithTag("YScaleSlider").GetComponent<Slider>();
+        tempObject = GameObject.Find("StarMode");
+        if (tempObject) {
+            starToggle = tempObject.GetComponent<Toggle>();
+        } else {
+            Debug.LogError("Star toggle not found");
+        }
 
-        music = GameObject.FindGameObjectWithTag("Music").GetComponent<AudioSource>();
+        tempObject = GameObject.Find("SpeedSlider");
+        if (tempObject) {
+            speedSlider = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Speed slider not found");
+        }
+
+        tempObject = GameObject.Find("RotateSlider");
+        if (tempObject) {
+            rotateSlider = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Rotate slider not found");
+        }
+
+        tempObject = GameObject.Find("SideSlider");
+        if (tempObject) {
+            sideSlider = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Side slider not found");
+        }
+
+        tempObject = GameObject.Find("XScaleSlider");
+        if (tempObject) {
+            xScaleSlider = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("X Scale slider not found");
+        }
+
+        tempObject = GameObject.Find("YScaleSlider");
+        if (tempObject) {
+            yScaleSlider = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Y Scale slider not found");
+        }
+        
+        tempObject = GameObject.Find("Music");
+        if (tempObject) {
+            music = tempObject.GetComponent<AudioSource>();
+        } else {
+            Debug.LogError("Music instance not found");
+        }
     }
 
     // Update is called once per frame
@@ -161,7 +209,11 @@ public class Triangle : MonoBehaviour
         meshRenderer.material.color = Color.Lerp(point1Renderer.material.color, point2Renderer.material.color, t);
 
         //Tie music volume to if the object is moving
-        music.volume = 0;
+        if (music) {
+            music.volume = 0;
+        } else {
+            Debug.LogError("Music instance not found");
+        }
 
         UpdateCollider();
     }
@@ -256,7 +308,14 @@ public class Triangle : MonoBehaviour
         meshTransform.Translate(pos1);
 
         //Set the material to selected material 
-        material = GameObject.FindGameObjectWithTag("DefaultMaterial").GetComponent<MeshRenderer>().material;
+        GameObject defaultMat = GameObject.Find("DefaultMaterial");
+        if (defaultMat) {
+            material = defaultMat.GetComponent<MeshRenderer>().material;
+        } else {
+            Debug.LogError("Default sprite material not found");
+            material = new Material(Shader.Find("Sprites/Default"));
+        }
+
         GetComponent<MeshRenderer>().material = material;
         
         //Make new mesh for object
@@ -271,7 +330,14 @@ public class Triangle : MonoBehaviour
 
         particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
 
-        particleRenderer.material = GameObject.FindGameObjectWithTag("DefaultParticle").GetComponent<MeshRenderer>().material;
+        GameObject defaultParticle = GameObject.Find("DefaultParticle");
+        if (defaultParticle) {
+            particleRenderer.material = defaultParticle.GetComponent<MeshRenderer>().material;
+        } else {
+            Debug.LogError("Default particle sprite not found");
+            particleRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        }
+
         ParticleSystem.EmissionModule emmission = particles.emission;
         emmission.rateOverTimeMultiplier = 5f;
         shape = particles.shape;
@@ -451,14 +517,20 @@ public class Triangle : MonoBehaviour
     }
 
     void SetSliders() {
-        xScaleSlider.value = scale.x;
-        yScaleSlider.value = scale.y;
+        if (xScaleSlider)
+            xScaleSlider.value = scale.x;
+        if (yScaleSlider)
+            yScaleSlider.value = scale.y;
 
-        speedSlider.value = speed;
-        rotateSlider.value = rotateAngle;
+        if (speedSlider)
+            speedSlider.value = speed;
+        if (rotateSlider)
+            rotateSlider.value = rotateAngle;
 
-        sideSlider.value = sides;
-        starToggle.isOn = isStar;
+        if (sideSlider)
+            sideSlider.value = sides;
+        if (starToggle)
+            starToggle.isOn = isStar;
     }
 
     void UpdateCollider() {
@@ -472,6 +544,10 @@ public class Triangle : MonoBehaviour
     }
 
     private void LateUpdate() {
-        music.volume += speed / 20f;
+        if (music) {
+            music.volume += speed / 20f;
+        } else {
+            Debug.LogError("Music instance not found");
+        }
     }
 }

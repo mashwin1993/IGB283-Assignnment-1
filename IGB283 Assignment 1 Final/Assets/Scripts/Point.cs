@@ -47,7 +47,7 @@ public class Point : MonoBehaviour
     // Use this for initialization
     public void Initialise(Vector2 pos, Material mat)
     {
-        tag = "Knob";
+        //tag = "Knob";
         material = mat;
         Draw();
         meshTransform.Translate(pos);
@@ -59,13 +59,49 @@ public class Point : MonoBehaviour
     }
 
     void GetReferences() {
-        sliderR = GameObject.FindGameObjectWithTag("SliderRed").GetComponent<Slider>();
-        sliderG = GameObject.FindGameObjectWithTag("SliderGreen").GetComponent<Slider>();
-        sliderB = GameObject.FindGameObjectWithTag("SliderBlue").GetComponent<Slider>();
+        GameObject tempObject;
 
-        xLockButton = GameObject.FindGameObjectWithTag("XButton").GetComponent<Toggle>();
-        yShareButton = GameObject.FindGameObjectWithTag("YButton").GetComponent<Toggle>();
-        forceYButton = GameObject.FindGameObjectWithTag("ForceYButton").GetComponent<Toggle>();
+        tempObject = GameObject.Find("Red");
+        if (tempObject) {
+            sliderR = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Red slider not found");
+        }
+
+        tempObject = GameObject.Find("Green");
+        if (tempObject) {
+            sliderG = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Green slider not found");
+        }
+
+        tempObject = GameObject.Find("Blue");
+        if (tempObject) {
+            sliderB = tempObject.GetComponent<Slider>();
+        } else {
+            Debug.LogError("Blue slider not found");
+        }
+
+        tempObject = GameObject.Find("LockX");
+        if (tempObject) {
+            xLockButton = tempObject.GetComponent<Toggle>();
+        } else {
+            Debug.LogError("Lock X toggle not found");
+        }
+
+        tempObject = GameObject.Find("ShareY");
+        if (tempObject) {
+            yShareButton = tempObject.GetComponent<Toggle>();
+        } else {
+            Debug.LogError("Share Y toggle not found");
+        }
+
+        tempObject = GameObject.Find("ForceObjectY");
+        if (tempObject) {
+            forceYButton = tempObject.GetComponent<Toggle>();
+        } else {
+            Debug.LogError("Force Y toggle not found");
+        }
     }
 
     // Update is called once per frame
@@ -238,9 +274,12 @@ public class Point : MonoBehaviour
 
     void SetSliders()
     {
-        sliderR.value = colorR;
-        sliderG.value = colorG;
-        sliderB.value = colorB;
+        if (sliderR)
+            sliderR.value = colorR;
+        if (sliderG)
+            sliderG.value = colorG;
+        if (sliderB)
+            sliderB.value = colorB;
     }
 
     void Reshape(int sides) {
@@ -317,7 +356,14 @@ public class Point : MonoBehaviour
 
         particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
 
-        particleRenderer.material = GameObject.FindGameObjectWithTag("DefaultParticle").GetComponent<MeshRenderer>().material;
+        GameObject defaultParticle = GameObject.Find("DefaultParticle");
+        if (defaultParticle) {
+            particleRenderer.material = defaultParticle.GetComponent<MeshRenderer>().material;
+        } else {
+            Debug.LogError("Default particle sprite not found");
+            particleRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        }
+
         ParticleSystem.EmissionModule emmission = particles.emission;
         emmission.rateOverTimeMultiplier = 5f;
         shape = particles.shape;
