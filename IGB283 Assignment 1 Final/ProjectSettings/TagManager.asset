@@ -4,10 +4,24 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - PointA
-  - PointB
-  - Object
   - Knob
+  - Object
+  - SideSlider
+  - SpeedSlider
+  - RotationSlider
+  - StarButton
+  - SliderRed
+  - SliderGreen
+  - SliderBlue
+  - ObjectParent
+  - Music
+  - DefaultMaterial
+  - YScaleSlider
+  - XScaleSlider
+  - XButton
+  - YButton
+  - ForceYButton
+  - DefaultParticle
   layers:
   - Default
   - TransparentFX
