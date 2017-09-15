@@ -54,12 +54,12 @@ MonoBehaviour:
   isMoving: 0
   isSelected: 0
   lockX: 0
-  size: 1
+  pairPoint: {fileID: 0}
   material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   mesh: {fileID: 0}
-  SliderR: {fileID: 0}
-  SliderG: {fileID: 0}
-  SliderB: {fileID: 0}
-  ColorR: 1
-  ColorG: 1
-  ColorB: 1
+  sliderR: {fileID: 0}
+  sliderG: {fileID: 0}
+  sliderB: {fileID: 0}
+  colorR: 1
+  colorG: 1
+  colorB: 1

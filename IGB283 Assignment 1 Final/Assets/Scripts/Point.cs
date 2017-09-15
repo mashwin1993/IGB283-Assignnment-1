@@ -10,18 +10,17 @@ public class Point : MonoBehaviour
     public bool isSelected;
     public bool lockX;
 
-    //Draw size
-    public float size = 0.5f;
-
+    public Point pairPoint;
 
     //Materials
     public Material material;
+    public MeshRenderer meshRenderer;
     public Mesh mesh;
 
     //Offset for Rotation
     private Vector3 offset;
 
-    public Vector3 centre
+    public Vector3 Centre
     {
         get { return mesh.bounds.center; }
     }
@@ -30,13 +29,14 @@ public class Point : MonoBehaviour
     IGB283Transform meshTransform = new IGB283Transform();
 
     //Sliders
-    public Slider SliderR;
-    public Slider SliderG;
-    public Slider SliderB;
+    public Slider sliderR;
+    public Slider sliderG;
+    public Slider sliderB;
 
-    public float ColorR = 1.0f;
-    public float ColorG = 1.0f;
-    public float ColorB = 1.0f;
+    public float colorR = 1.0f;
+    public float colorG = 1.0f;
+    public float colorB = 1.0f;
+
 
 
     // Use this for initialization
@@ -48,8 +48,15 @@ public class Point : MonoBehaviour
         meshTransform.Translate(pos);
 
         gameObject.AddComponent<PolygonCollider2D>();
+
+        GetReferences();
     }
 
+    void GetReferences() {
+        sliderR = GameObject.FindGameObjectWithTag("SliderRed").GetComponent<Slider>();
+        sliderG = GameObject.FindGameObjectWithTag("SliderGreen").GetComponent<Slider>();
+        sliderB = GameObject.FindGameObjectWithTag("SliderBlue").GetComponent<Slider>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -58,16 +65,29 @@ public class Point : MonoBehaviour
         Move();
         SelectClick();
 
-        if (SliderR)
-            ColorR = SliderR.value;
-        if (SliderG)
-            ColorG = SliderG.value;
-        if (SliderB)
-            ColorB = SliderB.value;
+        
 
         if (isSelected)
         {
-            UpdateColor(ColorR, ColorG, ColorB);
+            if (sliderR) {
+                colorR = sliderR.value;
+            } else {
+                Debug.LogError("Red colour slider not found");
+            }
+
+            if (sliderG) {
+                colorG = sliderG.value;
+            } else {
+                Debug.LogError("Greem colour slider not found");
+            }
+
+            if (sliderB) {
+                colorB = sliderB.value;
+            } else {
+                Debug.LogError("Blue colour slider not found");
+            }
+
+            UpdateColor(colorR, colorG, colorB);
         }
     }
 
@@ -81,8 +101,9 @@ public class Point : MonoBehaviour
         // Get Mesh from the MeshFilter
         mesh = GetComponent<MeshFilter>().mesh;
 
-        //Set the material to selected material 
-        GetComponent<MeshRenderer>().material = material;
+        //Set the material to selected material
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.material = material;
 
         meshTransform.Initialise(mesh);
 
@@ -97,7 +118,7 @@ public class Point : MonoBehaviour
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         //transform.position = mousePosition;
-        Vector2 direction = mousePosition - new Vector2(centre.x, centre.y);
+        Vector2 direction = mousePosition - new Vector2(Centre.x, Centre.y);
         if (lockX)
         {
             direction.x = 0;
@@ -127,18 +148,22 @@ public class Point : MonoBehaviour
         }
         else if (!Input.GetMouseButton(0))
         {
-            if (isMoving)
-            {
-                Destroy(gameObject.GetComponent<PolygonCollider2D>());
-                gameObject.AddComponent<PolygonCollider2D>();
+            if (isMoving) {
+                UpdateCollider();
             }
             isMoving = false;
         }
     }
 
+    void UpdateCollider() {
+        if (gameObject.GetComponent<PolygonCollider2D>())
+            Destroy(gameObject.GetComponent<PolygonCollider2D>());
+        gameObject.AddComponent<PolygonCollider2D>();
+    }
+
     public void UpdateColor(float R, float G, float B)
     {
-        gameObject.GetComponent<MeshRenderer>().material.color = new Color(ColorR, ColorG, ColorB);
+        meshRenderer.material.color = new Color(colorR, colorG, colorB);
 
     }
 
@@ -159,7 +184,6 @@ public class Point : MonoBehaviour
         if (hitCollider && hitCollider.gameObject == gameObject)
         {
             isSelected = true;
-            FindSliders();
             SetSliders();
         }
         else
@@ -170,70 +194,53 @@ public class Point : MonoBehaviour
 
     void SetSliders()
     {
-        SliderR.value = ColorR;
-        SliderG.value = ColorG;
-        SliderB.value = ColorB;
+        sliderR.value = colorR;
+        sliderG.value = colorG;
+        sliderB.value = colorB;
     }
 
-    void FindSliders()
-    {
-        SliderR = GameObject.Find("Red").GetComponent<Slider>();
-        SliderG = GameObject.Find("Green").GetComponent<Slider>();
-        SliderB = GameObject.Find("Blue").GetComponent<Slider>();
-    }
-
-    void Reshape(int sides)
-    {
+    void Reshape(int sides) {
         //Reject values too low or high
-        if (sides < 3 || sides > 50)
-        {
+        if (sides < 3 || sides > 50) {
             Debug.LogErrorFormat("{0} is an invalid number of sides for the shape to have.", sides);
             return;
         }
 
         //Get the current position to move the new mesh to
-        Vector2 position = new Vector2(centre.x, centre.y);
+        Vector2 position = Centre;
 
-        List<Vector3> verts = new List<Vector3>();
-        //Add centre vertex
-        verts.Add(Vector3.zero);
+        List<Vector3> verts = new List<Vector3> {
+            //Add centre vertex
+            Vector3.zero
+        };
 
         //Add surrounding vertices
-        for (int i = 0; i < sides; i++)
-        {
+        for (int i = 0; i < sides; i++) {
             verts.Add(new Vector3(Mathf.Sin(i * 2 * Mathf.PI / sides), Mathf.Cos(i * 2 * Mathf.PI / sides), 1));
         }
 
-        List<int> tris = new List<int>();
-        //Add initial (outlier) tri
-        tris.Add(0);
-        tris.Add(1);
-        tris.Add(verts.Count - 1);
+        List<int> tris = new List<int> {
+            //Add initial (outlier) tri
+            0,
+            1,
+            verts.Count - 1
+        };
 
         //Add fanning out tris
-        for (int i = 1; i < sides; i++)
-        {
+        for (int i = 1; i < sides; i++) {
             tris.Add(0);
             tris.Add(i);
             tris.Add(i + 1);
         }
 
-        List<Color> colours = new List<Color>();
-        //Set all vertex colours to default
-        for (int i = 0; i < mesh.vertexCount; i++)
-        {
-            colours.Add(Color.white);
-        }
-
         //Send values to operation method
-        RecreateMesh(verts.ToArray(), tris.ToArray(), colours.ToArray());
+        RecreateMesh(verts.ToArray(), tris.ToArray());
 
         //Move new mesh to previous position
         meshTransform.Translate(position);
     }
 
-    void RecreateMesh(Vector3[] verts, int[] tris, Color[] colours)
-    {
+    void RecreateMesh(Vector3[] verts, int[] tris) {
         //Clear all data from the mesh
         mesh.Clear();
 
@@ -243,8 +250,11 @@ public class Point : MonoBehaviour
         //Add triangles to mesh
         mesh.triangles = tris;
 
-        //Add colours to mesh
-        mesh.colors = colours;
+        List<Color> colours = new List<Color>();
+        //Set all vertex colours to default
+        for (int i = 0; i < mesh.vertexCount; i++) {
+            colours.Add(Color.white);
+        }
 
         //Recalculate the bounds of the mesh
         mesh.RecalculateBounds();

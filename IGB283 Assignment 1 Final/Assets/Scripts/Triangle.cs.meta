@@ -1,10 +1,18 @@
 fileFormatVersion: 2
 guid: 39ab20c231235244eae26b9702e3aa89
-timeCreated: 1503147002
+timeCreated: 1505438837
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - starToggle: {instanceID: 0}
+  - sideSlider: {instanceID: 0}
+  - rotateSlider: {instanceID: 0}
+  - speedSlider: {instanceID: 0}
+  - material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - mesh: {instanceID: 0}
+  - objectPrefab: {instanceID: 0}
+  - Music: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
