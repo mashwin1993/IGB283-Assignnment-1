@@ -358,8 +358,8 @@ public class Triangle : MonoBehaviour
 
     void RecreateMesh(Vector3[] verts, int[] tris)
     {
-        Vector2 inverseScale = new Vector2(1 / scale.x, 1 / scale.y);
-        meshTransform.Scale(inverseScale);
+
+        meshTransform.ResetScale();
 
         //Clear all data from the mesh
         mesh.Clear();
