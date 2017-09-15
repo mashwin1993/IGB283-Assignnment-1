@@ -9,15 +9,15 @@ public class Matrix3x3{
 	// The identiy matrix
 	public static Matrix3x3 identity {
 		get {
-			// Create a new matrix
-			Matrix3x3 i = new Matrix3x3();
-
-			// Set the rows of the matrix
-			i.SetRow(0, new Vector3(1.0f, 0.0f, 0.0f));
-			i.SetRow(1, new Vector3(0.0f, 1.0f, 0.0f));
-			i.SetRow(2, new Vector3(0.0f, 0.0f, 1.0f));
-
-			return i;
+			// -- Your Code here --
+			//throw new System.NotImplementedException();
+            Matrix3x3 idMatrix = new Matrix3x3();
+            for (int i = 0; i < matrixOrder; i++) {
+                Vector3 idVec = zeroVector;
+                idVec[i] = 1;
+                idMatrix.SetRow(i, idVec);
+            }
+            return idMatrix;
 		}
 	}
 
@@ -25,15 +25,11 @@ public class Matrix3x3{
 	private static Vector3 zeroVector = new Vector3(0.0f, 0.0f, 0.0f);
 	public static Matrix3x3 zero {
 		get { 
-			// Create a new matrix
-			Matrix3x3 z = new Matrix3x3();
-
-			// Set the rows of the matrix
-			z.SetRow(0, zeroVector);
-			z.SetRow(1, zeroVector);
-			z.SetRow(2, zeroVector);
-
-			return z;
+			return new Matrix3x3(
+				zeroVector,
+				zeroVector,
+				zeroVector
+			);
 		}
 	}
 
@@ -102,14 +98,17 @@ public class Matrix3x3{
 	// The transpose of the matrix
 	public Matrix3x3 transpose {
 		get {
-			Matrix3x3 newMatrix = new Matrix3x3();
+            // -- Your Code here --
+            //throw new System.NotImplementedException();
+            Matrix3x3 newMatrix = new Matrix3x3();
 
-			for(int i = 0; i < matrixOrder; i++) {
-				newMatrix.SetColumn(i, this.GetRow(i));
-			}
-			
-			return newMatrix;
-		}
+            for (int i = 0; i < matrixOrder; i++) {
+                newMatrix.SetRow(i, this.GetColumn(i));
+            }
+
+            return newMatrix;
+
+        }
 	}
 
 	// Constructor
@@ -205,35 +204,34 @@ public class Matrix3x3{
 	// Operators
 	// Multiply two matrices together
 	public static Matrix3x3 operator* (Matrix3x3 b, Matrix3x3 c) {
-		// New matrix3x3 to store the values
-		Matrix3x3 newMatrix = new Matrix3x3();
+        // -- Your Code here --
+        //throw new System.NotImplementedException();
 
-		// For each row in b, multiply by c and find new row
-		for (int i = 0; i < matrixOrder; i++) {
-			Vector3 r = new Vector3(
-				b[i, 0] * c[0, 0] + b[i, 1] * c[1, 0] + b[i, 2] * c[2, 0],
-				b[i, 0] * c[0, 1] + b[i, 1] * c[1, 1] + b[i, 2] * c[2, 1],
-				b[i, 0] * c[0, 2] + b[i, 1] * c[1, 2] + b[i, 2] * c[2, 2]
-			);
+        Matrix3x3 newMatrix = new Matrix3x3();
 
-			newMatrix.SetRow(i, r);
-		}
-		return newMatrix;
+        for (int i = 0; i < matrixOrder; i++) {
+            for (int j = 0; j < matrixOrder; j++) {
+                newMatrix[i, j] = Vector3.Dot(b.GetRow(i), c.GetColumn(j));
+            }
+        }
+
+        return newMatrix;
 	}
 
-	// Multiply a matrix by a scalar
+	// Multiply a matrix by a scalar 
 	public static Matrix3x3 operator* (float b, Matrix3x3 c) {
-		// New matrix3x3 to store the values
-		Matrix3x3 newMatrix = new Matrix3x3();
+        // -- Your Code here --
+        //throw new System.NotImplementedException();
 
-		// multiply each value in c by b
-		for (int i = 0; i < matrixOrder; i++) {
-			for (int j = 0; j < matrixOrder; j++) {
-				newMatrix[i, j] = c[i, j] * b;
-			}
-		}
+        Matrix3x3 newMatrix = new Matrix3x3();
 
-		return newMatrix;
+        for (int i = 0; i < matrixOrder; i++) {
+            for (int j = 0; j < matrixOrder; j++) {
+                newMatrix[i, j] = c[i, j] * b;
+            }
+        }
+
+        return newMatrix;
 	}
 
 	public static Matrix3x3 operator* (Matrix3x3 c, float b) {
@@ -242,19 +240,18 @@ public class Matrix3x3{
 
 	// Test the equality of this matrix and another
 	public bool Equals(Matrix3x3 m2) {
-		
-		// For each row
-		for (int i = 0; i < matrixOrder; i++) {
-			// For each column
-			for (int j = 0; j < matrixOrder; j++) {
-				if(this[i, j] != m2[i, j]){
-					return false;
-				}
-			}
-		}
+		// -- Your Code here --
+		//throw new System.NotImplementedException();
 
-		// Everything was equal
-		return true;
+        for (int i = 0; i < matrixOrder; i++) {
+            for (int j = 0; j < matrixOrder; j++) {
+                if (this[i, j] != m2[i, j]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
 	}
 
 }

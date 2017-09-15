@@ -8,20 +8,10 @@ public class Triangle : MonoBehaviour
 {
     //Public Variables
 
-    //UI Elements V2
-    // Bool Toggle for isStar
-    public Toggle starToggle;
-    //# of Sides Slider
-    public Slider sideSlider;
-    //Rotation Slider
-    public Slider rotateSlider;
-    //Speed Slider
-    public Slider speedSlider;
-
-
     public bool reshape;
     public int sides = 3;
     public bool isStar;
+    public bool isSelected;
 
     //Locations
     public Vector2 pos1 = new Vector2(-3, 0);
@@ -47,20 +37,18 @@ public class Triangle : MonoBehaviour
         }
     }
 
-    public Vector2 scale = Vector2.one;
-
+    //Transform Values
     public Vector2 direction;
     public float speed = 1;
+
+    public float rotateAngle;
+
+    public Vector2 scale = Vector2.one;
+
 
     //Materials
     public Material material;
     public Mesh mesh;
-
-    //Public Rotation Angle Attach to slider
-    public float rotateAngle;
-
-    //Music Player
-    public AudioSource music;
 
     //References
     Point point1;
@@ -70,9 +58,39 @@ public class Triangle : MonoBehaviour
     MeshRenderer point1Renderer;
     MeshRenderer point2Renderer;
 
+    ParticleSystem particles;
+    ParticleSystemRenderer particleRenderer;
+    ParticleSystem.ShapeModule shape;
+
+    //UI Elements V2
+    // Bool Toggle for isStar
+    public Toggle starToggle;
+    //# of Sides Slider
+    public Slider sideSlider;
+    //Rotation Slider
+    public Slider rotateSlider;
+    //Speed Slider
+    public Slider speedSlider;
+    //X Scale Slider
+    public Slider xScaleSlider;
+    //Y Scale Slider
+    public Slider yScaleSlider;
+
+    //Music Player
+    public AudioSource music;
+
     public Vector3 Centre
     {
         get { return mesh.bounds.center; }
+    }
+
+    public Vector3 Origin {
+        get { if (mesh.vertices.Length > 0) {
+                return mesh.vertices[0];
+            } else {
+                return Vector3.zero;
+            }
+        }
     }
 
     //Tranform
@@ -82,6 +100,7 @@ public class Triangle : MonoBehaviour
     void Start()
     {
         Draw();
+
         GetReferences();
 
         //Duplication Code
@@ -109,18 +128,59 @@ public class Triangle : MonoBehaviour
         rotateSlider = GameObject.FindGameObjectWithTag("RotationSlider").GetComponent<Slider>();
         sideSlider = GameObject.FindGameObjectWithTag("SideSlider").GetComponent<Slider>();
 
+        xScaleSlider = GameObject.FindGameObjectWithTag("XScaleSlider").GetComponent<Slider>();
+        yScaleSlider = GameObject.FindGameObjectWithTag("YScaleSlider").GetComponent<Slider>();
+
         music = GameObject.FindGameObjectWithTag("Music").GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        print(name + " has a total of " + mesh.vertexCount + " vertices");
-        print("centred at " + Centre);
-        print("the first tri is: " + mesh.triangles[0] + ", " + mesh.triangles[1] + ", " + mesh.triangles[2]);
-        print(mesh.vertices[0]);
-        print(mesh.vertices[1]);
-        print(mesh.vertices[3]);
+        SelectClick();
+        Highlight();
+
+        GetUIUpdates();
+
+        //Reached point check
+        if (ReachedTarget())
+        {
+            SwitchTarget();
+        }
+
+        direction = GetTargetPoint.Centre - Origin;
+
+        UpdateTransform();
+
+        //Color Changing with Lerp
+        float totalDist = Vector3.Distance(point1.Centre, point2.Centre);
+        float remDist = Vector3.Distance(Origin, point2.Centre);
+
+        float t = (totalDist - remDist) / totalDist;
+
+        meshRenderer.material.color = Color.Lerp(point1Renderer.material.color, point2Renderer.material.color, t);
+
+        //Tie music volume to if the object is moving
+        music.volume = speed / 10f;
+
+        UpdateCollider();
+    }
+
+    void Highlight() {
+        if (isSelected) {
+            shape.position = Origin;
+            if (!particles.isPlaying) {
+                particles.Play();
+            }
+        } else {
+            particles.Stop();
+        }
+    }
+
+    void GetUIUpdates() {
+        if (!isSelected) {
+            return;
+        }
 
         //UI updates
         //Speed slider update
@@ -160,30 +220,26 @@ public class Triangle : MonoBehaviour
             Debug.LogError("Cannot find slider reference");
         }
 
-        //Reached point check
-        if (ReachedTarget())
-        {
-            SwitchTarget();
+        //X Scale slider update
+        if (xScaleSlider) {
+            scale.x = xScaleSlider.value;
+        } else {
+            Debug.LogError("Cannot find x scale slider reference");
         }
 
-        direction = GetTargetPoint.Centre - Centre;
+        //Y Scale slider update
+        if (yScaleSlider) {
+            scale.y = yScaleSlider.value;
+        } else {
+            Debug.LogError("Cannot find y scale slider reference");
+        }
+    }
 
-        
+    void UpdateTransform() {
         //Transform updates
         meshTransform.Translate(direction.normalized * speed * Time.deltaTime);
         meshTransform.Scale(scale);
-        meshTransform.RotateCenter(rotateAngle);
-
-        //Color Changing with Lerp
-        float totalDist = Vector3.Distance(point1.Centre, point2.Centre);
-        float remDist = Vector3.Distance(Centre, point2.Centre);
-
-        float t = (totalDist - remDist) / totalDist;
-
-        meshRenderer.material.color = Color.Lerp(point1Renderer.material.color, point2Renderer.material.color, t);
-
-        //Tie music volume to if the object is moving
-        music.volume = speed;
+        meshTransform.RotateOrigin(rotateAngle);
     }
 
     // Draw a rectangle
@@ -205,6 +261,25 @@ public class Triangle : MonoBehaviour
         
         //Make new mesh for object
         Reshape(sides);
+        gameObject.AddComponent<BoxCollider2D>();
+
+        ParticleSetup();
+    }
+
+    void ParticleSetup() {
+        particles = gameObject.AddComponent<ParticleSystem>();
+
+        particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
+
+        particleRenderer.material = GameObject.FindGameObjectWithTag("DefaultParticle").GetComponent<MeshRenderer>().material;
+        ParticleSystem.EmissionModule emmission = particles.emission;
+        emmission.rateOverTimeMultiplier = 5f;
+        shape = particles.shape;
+        shape.scale = Vector3.one * 0.2f;
+        ParticleSystem.MainModule main = particles.main;
+        main.startLifetime = 1;
+
+        shape.position = Origin;
     }
 
     Point PointAt(Vector2 pos)
@@ -212,6 +287,7 @@ public class Triangle : MonoBehaviour
         GameObject point = new GameObject("Point");
         Point script = point.AddComponent<Point>();
         script.Initialise(pos, material);
+        script.owner = this;
         return script;
     }
 
@@ -232,7 +308,7 @@ public class Triangle : MonoBehaviour
     bool ReachedTarget()
     {
         //Confirm whether the target is in touching distance of the frame
-        return Vector3.Distance(Centre, GetTargetPoint.Centre) < speed * Time.deltaTime;
+        return Vector3.Distance(Origin, GetTargetPoint.Centre) < speed * Time.deltaTime;
     }
 
     void Reshape(int sides)
@@ -245,7 +321,7 @@ public class Triangle : MonoBehaviour
         }
 
         //Get the current position to move the new mesh to
-        Vector2 position = Centre;
+        Vector2 position = Origin;
 
         List<Vector3> verts = new List<Vector3> {
             //Add centre vertex
@@ -282,9 +358,8 @@ public class Triangle : MonoBehaviour
 
     void RecreateMesh(Vector3[] verts, int[] tris)
     {
-        print("reshaping " + name);
-        print(sides + " sided shape");
-        print("total vertices: " + verts.Length);
+        Vector2 inverseScale = new Vector2(1 / scale.x, 1 / scale.y);
+        meshTransform.Scale(inverseScale);
 
         //Clear all data from the mesh
         mesh.Clear();
@@ -350,8 +425,49 @@ public class Triangle : MonoBehaviour
         meshTransform.Translate(offset);
     }
 
-    public void ReshapePress()
-    {
-        reshape = true;
+    public void MoveToY(float y) {
+        Vector2 movement = new Vector2(0, y - Origin.y);
+
+        meshTransform.Translate(movement);
+    }
+
+    void SelectClick() {
+        if (Input.GetMouseButtonDown(1)) {
+            SelectHover();
+        }
+    }
+
+    void SelectHover() {
+        Vector2 mousePostion = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Collider2D hitCollider = Physics2D.OverlapPoint(mousePostion);
+
+        if (hitCollider && hitCollider.gameObject == gameObject) {
+            isSelected = true;
+            SetSliders();
+        } else {
+            isSelected = false;
+        }
+    }
+
+    void SetSliders() {
+        xScaleSlider.value = scale.x;
+        yScaleSlider.value = scale.y;
+
+        speedSlider.value = speed;
+        rotateSlider.value = rotateAngle;
+
+        sideSlider.value = sides;
+        starToggle.isOn = isStar;
+    }
+
+    void UpdateCollider() {
+        if (gameObject.GetComponent<BoxCollider2D>())
+            Destroy(gameObject.GetComponent<BoxCollider2D>());
+        gameObject.AddComponent<BoxCollider2D>();
+    }
+
+    private void FixedUpdate() {
+        //UpdateCollider();
     }
 }

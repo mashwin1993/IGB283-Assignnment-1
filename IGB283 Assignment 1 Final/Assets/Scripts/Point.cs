@@ -11,14 +11,12 @@ public class Point : MonoBehaviour
     public bool lockX;
 
     public Point pairPoint;
+    public Triangle owner;
 
     //Materials
     public Material material;
     public MeshRenderer meshRenderer;
     public Mesh mesh;
-
-    //Offset for Rotation
-    private Vector3 offset;
 
     public Vector3 Centre
     {
@@ -37,7 +35,14 @@ public class Point : MonoBehaviour
     public float colorG = 1.0f;
     public float colorB = 1.0f;
 
+    //Buttons
+    Toggle xLockButton;
+    Toggle yShareButton;
+    Toggle forceYButton;
 
+    ParticleSystem particles;
+    ParticleSystemRenderer particleRenderer;
+    ParticleSystem.ShapeModule shape;
 
     // Use this for initialization
     public void Initialise(Vector2 pos, Material mat)
@@ -50,12 +55,17 @@ public class Point : MonoBehaviour
         gameObject.AddComponent<PolygonCollider2D>();
 
         GetReferences();
+        ParticleSetup();
     }
 
     void GetReferences() {
         sliderR = GameObject.FindGameObjectWithTag("SliderRed").GetComponent<Slider>();
         sliderG = GameObject.FindGameObjectWithTag("SliderGreen").GetComponent<Slider>();
         sliderB = GameObject.FindGameObjectWithTag("SliderBlue").GetComponent<Slider>();
+
+        xLockButton = GameObject.FindGameObjectWithTag("XButton").GetComponent<Toggle>();
+        yShareButton = GameObject.FindGameObjectWithTag("YButton").GetComponent<Toggle>();
+        forceYButton = GameObject.FindGameObjectWithTag("ForceYButton").GetComponent<Toggle>();
     }
 
     // Update is called once per frame
@@ -65,7 +75,7 @@ public class Point : MonoBehaviour
         Move();
         SelectClick();
 
-        
+        Highlight();
 
         if (isSelected)
         {
@@ -88,6 +98,17 @@ public class Point : MonoBehaviour
             }
 
             UpdateColor(colorR, colorG, colorB);
+        }
+    }
+
+    void Highlight() {
+        if (isSelected) {
+            shape.position = Centre;
+            if (!particles.isPlaying) {
+                particles.Play();
+            }
+        } else {
+            particles.Stop();
         }
     }
 
@@ -119,13 +140,36 @@ public class Point : MonoBehaviour
 
         //transform.position = mousePosition;
         Vector2 direction = mousePosition - new Vector2(Centre.x, Centre.y);
-        if (lockX)
-        {
-            direction.x = 0;
+        if (xLockButton) {
+            if (xLockButton.isOn) {
+                direction.x = 0;
+            }
+        } else {
+            Debug.LogError("X Lock toggle not found");
+        }
+
+        if (yShareButton) {
+            if (yShareButton.isOn) {
+                pairPoint.MoveToY(mousePosition.y);
+                if (forceYButton) {
+                    if (forceYButton.isOn) {
+                        owner.MoveToY(mousePosition.y);
+                    }
+                } else {
+                    Debug.LogError("Force Y toggle not found");
+                }
+            } else {
+                if (forceYButton) {
+                    forceYButton.isOn = false;
+                } else {
+                    Debug.LogError("Force Y toggle not found");
+                }
+            }
+        } else {
+            Debug.LogError("Y Share toggle not found");
         }
 
         meshTransform.Translate(direction);
-        //GetComponent<PolygonCollider2D>().
     }
 
     void MouseOverAction()
@@ -258,5 +302,27 @@ public class Point : MonoBehaviour
 
         //Recalculate the bounds of the mesh
         mesh.RecalculateBounds();
+    }
+
+    public void MoveToY(float y) {
+        Vector2 direction = new Vector2(0, y - Centre.y);
+
+        meshTransform.Translate(direction);
+
+        UpdateCollider();
+    }
+
+    void ParticleSetup() {
+        particles = gameObject.AddComponent<ParticleSystem>();
+
+        particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
+
+        particleRenderer.material = GameObject.FindGameObjectWithTag("DefaultParticle").GetComponent<MeshRenderer>().material;
+        ParticleSystem.EmissionModule emmission = particles.emission;
+        emmission.rateOverTimeMultiplier = 5f;
+        shape = particles.shape;
+        shape.scale = Vector3.one * 0.2f;
+        ParticleSystem.MainModule main = particles.main;
+        main.startLifetime = 1;
     }
 }

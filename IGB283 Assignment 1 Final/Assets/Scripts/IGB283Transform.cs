@@ -6,12 +6,21 @@ public class IGB283Transform : MonoBehaviour
 
     Mesh mesh;
 
+    float rotation = 0;
+
     Vector2 scale = new Vector2(1, 1);
     Vector2 signedScale = new Vector2(1, 1);
 
     //Mesh displacement for exact origin
-    Vector2 displacement = new Vector2();
-
+    public Vector3 Origin {
+        get {
+            if (mesh.vertices.Length > 0) {
+                return mesh.vertices[0];
+            } else {
+                return Vector3.zero;
+            }
+        }
+    }
     //Localises the object's mesh
     public void Initialise(Mesh objectMesh)
     {
@@ -22,7 +31,6 @@ public class IGB283Transform : MonoBehaviour
     public void Translate(Vector2 direction)
     {
         ApplyTransform(TranslationMatrix(direction));
-        displacement += direction;
     }
 
     //Rotate the mesh, default to origin rotate
@@ -34,7 +42,7 @@ public class IGB283Transform : MonoBehaviour
     //Rotate the mesh based on the starting origin
     public void RotateOrigin(float angle)
     {
-        RotatePoint(displacement, angle);
+        RotatePoint(Origin, angle, true);
     }
 
     //Rotate the mesh around the gameobject
@@ -46,12 +54,16 @@ public class IGB283Transform : MonoBehaviour
     //Rotate the mesh around the bounds centre
     public void RotateCenter(float angle)
     {
-        RotatePoint(new Vector2(mesh.bounds.center.x, mesh.bounds.center.y), angle);
+        RotatePoint(new Vector2(mesh.bounds.center.x, mesh.bounds.center.y), angle, true);
     }
 
     //Rotate the mesh around a point
-    public void RotatePoint(Vector2 rotatePoint, float angle)
+    public void RotatePoint(Vector2 rotatePoint, float angle, bool update)
     {
+        if (update) {
+            rotation += angle;
+        }
+        
         Matrix3x3 fullTransform = TranslationMatrix(rotatePoint) *
             RotationMatrix(angle) *
             TranslationMatrix(-rotatePoint);
@@ -83,12 +95,18 @@ public class IGB283Transform : MonoBehaviour
             toScale.y *= -1;
         }
 
-        toScale.x = Mathf.Clamp(toScale.x, 0.000001f, float.MaxValue);
-        toScale.y = Mathf.Clamp(toScale.y, 0.000001f, float.MaxValue);
+        toScale.x = Mathf.Clamp(toScale.x, 0.0001f, float.MaxValue);
+        toScale.y = Mathf.Clamp(toScale.y, 0.0001f, float.MaxValue);
 
-        Vector2 offset = mesh.bounds.center;
+        Vector2 offset = Origin;
         Translate(-offset);
+
+        RotatePoint(Origin, -rotation, false);
+
         ApplyTransform(ScaleMatrix(new Vector2((toScale.x * toScalePositive.x) / (signedScale.x * scale.x), (toScale.y * toScalePositive.y) / (signedScale.y * scale.y))));
+
+        RotatePoint(Origin, rotation, false);
+
         Translate(offset);
 
         signedScale = toScalePositive;
@@ -154,5 +172,9 @@ public class IGB283Transform : MonoBehaviour
         scaleMatrix.SetRow(2, new Vector3(0, 0, 1));
 
         return scaleMatrix;
+    }
+
+    void ResetRotation() {
+        rotation = 0;
     }
 }
