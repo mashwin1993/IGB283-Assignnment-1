@@ -174,7 +174,11 @@ public class IGB283Transform : MonoBehaviour
         return scaleMatrix;
     }
 
-    void ResetRotation() {
+    public void ResetRotation() {
         rotation = 0;
+    }
+
+    public void ResetScale() {
+        scale = Vector2.one;
     }
 }
