@@ -161,7 +161,7 @@ public class Triangle : MonoBehaviour
         meshRenderer.material.color = Color.Lerp(point1Renderer.material.color, point2Renderer.material.color, t);
 
         //Tie music volume to if the object is moving
-        music.volume = speed / 10f;
+        music.volume = 0;
 
         UpdateCollider();
     }
@@ -469,5 +469,9 @@ public class Triangle : MonoBehaviour
 
     private void FixedUpdate() {
         //UpdateCollider();
+    }
+
+    private void LateUpdate() {
+        music.volume += speed / 20f;
     }
 }
